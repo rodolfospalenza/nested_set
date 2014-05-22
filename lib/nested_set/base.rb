@@ -144,11 +144,17 @@ module CollectiveIdea #:nodoc:
           #   Categories.find(42).self_and_descendants.arrange
           #
           # This arranged hash can be rendered with recursive render_tree helper
-          def arrange
+          def arrange(array = nil)
+            sorted = if array.present?
+                       array.sort { |a,b| a.send(left_column_name) <=> b.send(left_column_name) }
+                     else
+                       order("#{quoted_table_name}.#{quoted_left_column_name}")
+                     end
+
             arranged = ActiveSupport::OrderedHash.new
             insertion_points = [arranged]
             depth = 0
-            order("#{quoted_table_name}.#{quoted_left_column_name}").each_with_level do |node, level|
+            each_with_level(sorted) do |node, level|
               next if level > depth && insertion_points.last.keys.last && node.parent_id != insertion_points.last.keys.last.id
               insertion_points.push insertion_points.last.values.last if level > depth
               (depth - level).times { insertion_points.pop } if level < depth
