@@ -118,8 +118,8 @@ module CollectiveIdea #:nodoc:
           tag = options.delete(:tag) || :ul
 
           content_tag tag, options do
-            hash.keys.sort_by(&sort_proc).each do |node|
-              block.call node, render_tree(hash[node], :sort => sort_proc, &block)
+            hash.keys.sort_by(&sort_proc).each_with_index do |node, index|
+              block.call node, render_tree(hash[node], :sort => sort_proc, &block), index
             end
           end if hash.present?
         end
